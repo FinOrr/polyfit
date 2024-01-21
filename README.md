@@ -1,6 +1,10 @@
 # PolyFitExtrapolator
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![GitHub top language](https://img.shields.io/github/languages/top/FinOrr/c-polyfit-extrapolator.svg)](https://github.com/FinOrr/c-polyfit-extrapolator)
+[![GitHub issues](https://img.shields.io/github/issues/FinOrr/c-polyfit-extrapolator.svg)](https://github.com/FinOrr/c-polyfit-extrapolator/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/FinOrr/c-polyfit-extrapolator.svg)](https://github.com/FinOrr/c-polyfit-extrapolator/pulls)
+
 
 ## Overview
 
