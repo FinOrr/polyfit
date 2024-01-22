@@ -1,9 +1,9 @@
 # PolyFit
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![GitHub top language](https://img.shields.io/github/languages/top/FinOrr/c-polyfit.svg)](https://github.com/FinOrr/c-polyfit)
-[![GitHub issues](https://img.shields.io/github/issues/FinOrr/c-polyfit.svg)](https://github.com/FinOrr/c-polyfit/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/FinOrr/c-polyfit.svg)](https://github.com/FinOrr/c-polyfit/pulls)
+[![GitHub top language](https://img.shields.io/github/languages/top/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit)
+[![GitHub issues](https://img.shields.io/github/issues/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/pulls)
 
 
 ## Overview
@@ -23,19 +23,19 @@
 Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/PolyFit.git
+git clone https://github.com/FinOrr/polyfit.git
 ```
 
 Build the library:
 
 ```bash
-cd c-polyfit
+cd polyfit
 make
 ```
 
 ### Usage
 
-The Makefile creates a shared library (libpolyfit.so) from your source file (polyFit.c).
+The Makefile creates a shared library (libpolyfit.so) from your source file (polyfit.c).
 
 To use the library in another project, you'll need to compile with the -L flag to specify the library path and the -l flag to specify the library name (without the "lib" prefix and ".so" extension). For example:
 
@@ -67,7 +67,7 @@ Examples coming soon...
 
 ## Documentation
 
-Detailed documentation can be found in the [Wiki](https://github.com/FinOrr/c-polyfit/wiki).
+Detailed documentation can be found in the [Wiki](https://github.com/FinOrr/polyfit/wiki).
 
 ## Contributing
 
@@ -79,5 +79,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   
 ## Contact
 
-For any inquiries or support, please use the [Issues](https://github.com/FinOrr/c-polyfit/issues) page.
+For any inquiries or support, please use the [Issues](https://github.com/FinOrr/polyfit/issues) page.
  
