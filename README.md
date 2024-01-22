@@ -33,6 +33,32 @@ cd c-polyfit-extrapolator
 make
 ```
 
+### Usage
+
+This Makefile creates a shared library (libpolyfit.so) from your source file (polyFitExtrapolator.c). The -shared option is used to specify that a shared library should be created. The -fPIC option is used to generate position-independent code, which is necessary for shared libraries.
+
+To use the library in another project, you'll need to compile with the -L flag to specify the library path and the -l flag to specify the library name (without the "lib" prefix and ".so" extension). For example:
+
+```bash
+
+CC = gcc
+CFLAGS = -Wall -Wextra -g
+LIB_PATH = /path/to/library
+LIB_NAME = polyfit
+SRC = your_source_file.c
+EXECUTABLE = your_executable
+
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(SRC)
+	$(CC) $(CFLAGS) -o $@ $< -L$(LIB_PATH) -l$(LIB_NAME)
+```
+
+To get started in using the library in your own projects, simply:
+- Replace /path/to/library with the actual path to your library;
+- Ensure to link polyfit with the actual library name (without the "lib" prefix and ".so" extension).
+Please note that his assumes that the library (libpolyfit.so) is located in /path/to/library.
+
 ### Example
 
 ```c
