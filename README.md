@@ -1,19 +1,19 @@
-# PolyFitExtrapolator
+# PolyFit
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![GitHub top language](https://img.shields.io/github/languages/top/FinOrr/c-polyfit-extrapolator.svg)](https://github.com/FinOrr/c-polyfit-extrapolator)
-[![GitHub issues](https://img.shields.io/github/issues/FinOrr/c-polyfit-extrapolator.svg)](https://github.com/FinOrr/c-polyfit-extrapolator/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/FinOrr/c-polyfit-extrapolator.svg)](https://github.com/FinOrr/c-polyfit-extrapolator/pulls)
+[![GitHub top language](https://img.shields.io/github/languages/top/FinOrr/c-polyfit.svg)](https://github.com/FinOrr/c-polyfit)
+[![GitHub issues](https://img.shields.io/github/issues/FinOrr/c-polyfit.svg)](https://github.com/FinOrr/c-polyfit/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/FinOrr/c-polyfit.svg)](https://github.com/FinOrr/c-polyfit/pulls)
 
 
 ## Overview
 
-**PolyFitExtrapolator** is a C library designed to facilitate accurate polynomial fitting for curve approximation and extrapolation of data points. Enhance your data analysis capabilities with this efficient and versatile tool!
+**PolyFit** is a C library designed to facilitate accurate polynomial fitting for curve approximation, allowing for interpolation and extrapolation of data points. Enhance your data analysis capabilities with this efficient and versatile tool!
 
 ## Features
 
 - Polynomial fitting for curve approximation.
-- Extrapolation functionality for predicting additional data points.
+- Interpolation and extrapolation functionality for predicting additional data points.
 - Lightweight and easy-to-integrate into existing C projects.
 
 ## Usage
@@ -23,19 +23,19 @@
 Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/PolyFitExtrapolator.git
+git clone https://github.com/your-username/PolyFit.git
 ```
 
 Build the library:
 
 ```bash
-cd c-polyfit-extrapolator
+cd c-polyfit
 make
 ```
 
 ### Usage
 
-This Makefile creates a shared library (libpolyfit.so) from your source file (polyFitExtrapolator.c). The -shared option is used to specify that a shared library should be created. The -fPIC option is used to generate position-independent code, which is necessary for shared libraries.
+The Makefile creates a shared library (libpolyfit.so) from your source file (polyFit.c).
 
 To use the library in another project, you'll need to compile with the -L flag to specify the library path and the -l flag to specify the library name (without the "lib" prefix and ".so" extension). For example:
 
@@ -67,7 +67,7 @@ Examples coming soon...
 
 ## Documentation
 
-Detailed documentation can be found in the [Wiki](https://github.com/FinOrr/c-polyfit-extrapolator/wiki).
+Detailed documentation can be found in the [Wiki](https://github.com/FinOrr/c-polyfit/wiki).
 
 ## Contributing
 
@@ -79,5 +79,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   
 ## Contact
 
-For any inquiries or support, please use the [Issues](https://github.com/FinOrr/c-polyfit-extrapolator/issues) page.
+For any inquiries or support, please use the [Issues](https://github.com/FinOrr/c-polyfit/issues) page.
  
