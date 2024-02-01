@@ -35,7 +35,13 @@ make
 
 ### Usage
 
-TInclude 
+Copy the polyFit.c and polyFit.h files into your project directory.
+
+Include the polyFit.h header file in your source files where you want to use the polynomial regression functionality.
+
+```c
+#include "polyFit.h"
+```
 
 ### Example
 
@@ -44,21 +50,21 @@ To build the demo, you'll need CMake installed.
 
 Open a terminal, navigate to the directory containing your source files and the CMakeLists.txt, and run the following commands:
 
-`
+```bash
 mkdir build
 cd build
 cmake ..
-`
+```
 
 This will generate the build files. Once the files are generated, you can build your project by running:
-`
+```bash
 make
-`
+```
 
 This will compile your source files and create the executable. If you want to clean the generated files, you can run:
-`
+```bash
 make clean
-`
+```
 
 The resulting executable will be in the build directory.
 
