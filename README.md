@@ -26,15 +26,6 @@ Clone the repository:
 git clone https://github.com/FinOrr/polyfit.git
 ```
 
-Build the library:
-
-```bash
-cd polyfit
-make
-```
-
-### Usage
-
 Copy the polyFit.c and polyFit.h files into your project directory.
 
 Include the polyFit.h header file in your source files where you want to use the polynomial regression functionality.
