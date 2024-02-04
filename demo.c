@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "polyFit.h"
 
 int main(void) {

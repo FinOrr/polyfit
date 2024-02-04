@@ -1,15 +1,13 @@
 /**
  ******************************************************************************
  * @file    polyFit.h
- * @brief   Header file for polynomial extrpolation.
+ * @brief   Header file for fitting polynomials to datasets.
  ******************************************************************************
  */
 
 #ifndef INC_POLYFIT_H_
 #define INC_POLYFIT_H_
 
-#include <math.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,5 +70,22 @@ float evaluatePolynomial(const Polynomial *poly, float x);
  * @return Maximum absolute magnitude among the coefficients.
  */
 float getMaxCoefficientMagnitude(const float *coefficients, int32_t degree);
+
+
+/**
+ * @brief Function to calculate the power of a base to an exponent.
+ * @brief This is to avoid having to link the MASSIVE math.h library.
+ * @param base The base value (float).
+ * @param exponent The exponent value (signed 32-bit integer).
+ * @return Result of base raised to the power of exponent.
+ */
+float tinyPow(float base, int32_t exponent);
+
+/**
+ * @brief Calculate the absolute value of a floating-point number.
+ * @param x The input floating-point number.
+ * @return Absolute value of x.
+ */
+float tinyFabs(float x);
 
 #endif /* INC_POLYFIT_H_ */

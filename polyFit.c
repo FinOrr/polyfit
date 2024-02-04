@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file polyFit.c
- * @brief Implement a least squares polynomial regression to estimate RPM.
+ * @brief   Source file for fitting polynomials to datasets.
  ******************************************************************************
  * @attention
  *
@@ -14,9 +14,6 @@
  */
 
 #include "polyFit.h"
-
-// Debug
-#include <stdio.h>
 
 /**
  * @brief Initialise a polynomial and return a pointer to it.
@@ -73,7 +70,7 @@ void gaussianElimination(float **A, float *B, float *x, int32_t n) {
     // Pivot
     int32_t max = i;
     for (int32_t j = i + 1; j < n; ++j) {
-      if (fabs(A[j][i]) > fabs(A[max][i])) {
+      if (tinyFabs(A[j][i]) > tinyFabs(A[max][i])) {
         max = j;
       }
     }
@@ -130,35 +127,16 @@ void leastSquaresPolynomialRegression(const float *x, const float *y,
     for (int32_t j = 0; j <= degree; ++j) {
       A[i][j] = 0.0;
       for (int32_t k = 0; k < numPoints; ++k) {
-        A[i][j] += pow(x[k], i + j);
+        A[i][j] += tinyPow(x[k], i + j);
       }
     }
     for (int32_t k = 0; k < numPoints; ++k) {
-      B[i] += y[k] * pow(x[k], i);
+      B[i] += y[k] * tinyPow(x[k], i);
     }
-  }
-
-  printf("Matrix A:\n");
-  for (int32_t i = 0; i <= degree; ++i) {
-    for (int32_t j = 0; j <= degree; ++j) {
-      printf("%.2f\t", A[i][j]);
-    }
-    printf("\n");
-  }
-
-  printf("\nVector B:\n");
-  for (int32_t i = 0; i <= degree; ++i) {
-    printf("%.2f\n", B[i]);
   }
 
   // Solve the system of linear equations (Ax = B) for coefficients
   gaussianElimination(A, B, resultPoly->coefficients, degree + 1);
-
-  // After the gaussianElimination function call
-  printf("\nResult Vector x:\n");
-  for (int32_t i = 0; i <= degree; ++i) {
-    printf("%.2f\n", x[i]);
-  }
 
   // Free allocated memory for matrices
   for (int32_t i = 0; i <= degree; ++i) {
@@ -183,20 +161,20 @@ float evaluatePolynomial(const Polynomial *poly, float x) {
   float result = 0.0;
 
   for (int32_t i = 0; i <= poly->degree; ++i) {
-    result += poly->coefficients[i] * pow(x, i);
+    result += poly->coefficients[i] * tinyPow(x, i);
   }
 
   // Apply a combination of relative and absolute thresholds
-  float absoluteThreshold =
-      1e-6;  // Absolute threshold to consider a value negligible
-  float relativeThreshold =
-      1e-6;  // Relative threshold relative to coefficient magnitudes
+  // Absolute threshold to consider a value negligible
+  float absoluteThreshold = 1e-6;
+  // Relative threshold relative to coefficient magnitudes
+  float relativeThreshold = 1e-6;
 
   // If the result is close to zero, set it to zero
-  if (fabs(result) <
+  if (tinyFabs(result) <
           relativeThreshold *
               getMaxCoefficientMagnitude(poly->coefficients, poly->degree) ||
-      fabs(result) < absoluteThreshold) {
+      tinyFabs(result) < absoluteThreshold) {
     result = 0.0f;
   }
 
@@ -218,11 +196,74 @@ float getMaxCoefficientMagnitude(const float *coefficients, int32_t degree) {
   float maxMagnitude = 0.0;
 
   for (int32_t i = 0; i <= degree; ++i) {
-    float magnitude = fabs(coefficients[i]);
+    float magnitude = tinyFabs(coefficients[i]);
     if (magnitude > maxMagnitude) {
       maxMagnitude = magnitude;
     }
   }
 
   return (maxMagnitude);
+}
+
+/**
+ * @brief Function to calculate the power of a base to an exponent.
+ * @brief This is to avoid having to link the MASSIVE math.h library.
+ * @param base The base value (float).
+ * @param exponent The exponent value (signed 32-bit integer).
+ * @return Result of base raised to the power of exponent.
+ */
+float tinyPow(float base, int32_t exponent) {
+  // Check for special cases
+  if (base == 0.0f) {
+    if (exponent == 0) {
+      return 1.0f;  // 0^0 is considered 1 by convention
+    } else if (exponent < 0) {
+      // Handling 0 ^ negative_exponent is undefined, return an error value or
+      // NaN as needed
+      return (0.0f);  // Adjust this according to your specific requirements
+    }
+  }
+
+  // Initialise result
+  float result = 1.0f;
+
+  // Determine the positive or negative exponent
+  int32_t absExponent = exponent > 0 ? exponent : -exponent;
+
+  // Calculate power using binary exponentiation for efficiency
+  while (absExponent > 0) {
+    if (absExponent % 2 == 1) {
+      result *= base;
+    }
+    base *= base;
+    absExponent /= 2;
+  }
+
+  // Adjust result for negative exponent
+  if (exponent < 0) {
+    result = 1.0f / result;
+  }
+
+  return (result);
+}
+
+/**
+ * @brief Calculate the absolute value of a floating-point number.
+ * @param x The input floating-point number.
+ * @return Absolute value of x.
+ */
+float tinyFabs(float x) {
+  // Handle NaN (Not-a-Number)
+  if (!(x == x)) {
+    // Return NaN if x is NaN
+    return (x);
+  }
+
+  // Handle negative zero
+  if (x == 0.0f && *((uint32_t *)&x) & 0x80000000) {
+    // Return positive zero if x is negative zero
+    return (0.0f);
+  }
+
+  return ((x < 0.0f) ? -x : x);
 }
