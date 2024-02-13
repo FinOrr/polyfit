@@ -8,7 +8,43 @@
 
 ## Overview
 
-**PolyFit** is a C library designed to facilitate accurate polynomial fitting for curve approximation, allowing for interpolation and extrapolation of data points. Enhance your data analysis capabilities with this efficient and versatile tool!
+**PolyFit** is a C library designed to facilitate accurate polynomial fitting for curve approximation, allowing for interpolation and extrapolation of data points. With just a few input datapoints, you can model your system quickly and efficiently.
+
+## Use Case Scenarios
+
+Sound a bit asbtract? No worries, here's some examples of where PolyFit might help solve your problem.
+
+**Curve Fitting in Data Analysis** 
+- In climate science research, polynomial curve fitting is applied to analyse historical temperature data and predict future climate trends, aiding in understanding global warming patterns.
+
+**Image Processing and Computer Vision** 
+- Polynomials are utilised in computer vision tasks, such as facial recognition systems, where they help map facial features accurately for identification purposes.
+
+**Signal Processing and Filtering**
+- Biomedical engineers use polynomial filters to remove noise from electroencephalogram (EEG) signals within neuroscience research, improving the detection of brainwave patterns and facilitating the diagnosis of neurological disorders.
+
+**Financial Modeling and Time Series Analysis**
+- Financial analysts utilise polynomial regression models to analyse market data and predict prices. For example, in investment banking, polynomial models are employed to forecast future stock prices, aiding investors in making informed trading decisions.
+
+**Robotics and Path Planning**
+- Autonomous drones use polynomial trajectories for path planning in search and rescue missions. For instance, in disaster response scenarios, drones navigate through complex environments by following smooth polynomial paths, enabling efficient search operations and rescuing survivors. Think:
+  - feature trajectory estimation;
+  - motion model for localisation;
+  - map building and refinement; and
+  - sensor calibration.
+
+**Function Approximation in Optimization**
+- Civil engineers use polynomial approximations to model stress-strain relationships in structural materials for bridge design. By approximating complex material behavior with polynomials, engineers can optimise structural designs for safety and durability under various loading conditions.
+
+**Transform Functions and Control Systems**
+- This was the original purpose of the library; to generate transfer functions for systems. Woo!
+- Polynomial models are vital in representing system transfer functions, which describe the relationship between inputs and outputs of a dynamic system. By mapping polynomials to transfer functions, engineers can model the behavior of diverse systems across various domains, including aerospace, automotive, and industrial control.
+- For instance, in control systems engineering, polynomials are transformed into transfer functions to characterise the dynamics of physical systems, such as aircraft, vehicles, and manufacturing processes! These transfer functions capture the system's response to inputs and enable engineers to design control algorithms to achieve desired performance objectives, such as stability, responsiveness, and robustness.
+- With transfer functions derived from polynomials, engineers can perform advanced control systems analysis techniques, such as Root-Locus, frequency response analysis, and pole-zero analysis.
+
+**Control System Applications**
+- In industrial automation, polynomial controllers are used to regulate robotic arm movements in manufacturing processes. For example, in automotive assembly lines, polynomial-based controllers ensure accurate positioning of robotic arms for welding and assembly tasks. 
+
 
 ## Features
 
