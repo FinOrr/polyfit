@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file polyFit.c
+ * @file polyfit.c
  * @brief   Source file for fitting polynomials to datasets.
  ******************************************************************************
  * @attention
@@ -13,7 +13,7 @@
  ******************************************************************************
  */
 
-#include "polyFit.h"
+#include "polyfit.h"
 
 /**
  * @brief Initialise a polynomial and return a pointer to it.
