@@ -7,7 +7,15 @@
 
 ## Overview
 
-**PolyFit** is a C library designed to facilitate accurate polynomial fitting for curve approximation, allowing for interpolation and extrapolation of data points. With just a few input datapoints, you can model your system quickly and efficiently.
+**PolyFit** is a C library designed to facilitate accurate polynomial fitting for curve approximation, allowing for interpolation and extrapolation of data. With just a few input datapoints, you can model your system quickly and efficiently.
+
+## Features
+
+- Polynomial fitting for curve approximation.
+
+- Interpolation and extrapolation functionality for predicting additional data points.
+
+- Lightweight and easy-to-integrate into existing C projects.
 
 ## Table of Contents
 
@@ -57,16 +65,6 @@ Sound a bit asbtract? No worries, here's some examples of where PolyFit can help
 - In industrial automation, polynomial controllers regulate motors by translating input commands into precise motor outputs. 
 - By applying specific inputs and measuring corresponding outputs, such as speed or torque, engineers optimise manufacturing processes. 
 - For example, in controlling fluid pump outputs, polynomial controllers enable adjustments to achieve desired pressure levels or flow rates, enhancing efficiency and product quality.
-
-**[Back to top](#table-of-contents)**
-
-## Features
-
-- Polynomial fitting for curve approximation.
-
-- Interpolation and extrapolation functionality for predicting additional data points.
-
-- Lightweight and easy-to-integrate into existing C projects.
 
 **[Back to top](#table-of-contents)**
 
