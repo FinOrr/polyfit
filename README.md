@@ -12,7 +12,7 @@
 
 ## Use Case Scenarios
 
-Sound a bit asbtract? No worries, here's some examples of where PolyFit might help solve your problem.
+Sound a bit asbtract? No worries, here's some examples of where PolyFit might solve a problem you have.
 
 **Curve Fitting in Data Analysis** 
 - In climate science research, polynomial curve fitting is applied to analyse historical temperature data and predict future climate trends, aiding in understanding global warming patterns.
@@ -33,18 +33,19 @@ Sound a bit asbtract? No worries, here's some examples of where PolyFit might he
   - map building and refinement; and
   - sensor calibration.
 
-**Function Approximation in Optimization**
+**Function Approximation in Optimisation**
 - Civil engineers use polynomial approximations to model stress-strain relationships in structural materials for bridge design. By approximating complex material behavior with polynomials, engineers can optimise structural designs for safety and durability under various loading conditions.
 
 **Transform Functions and Control Systems**
-- This was the original purpose of the library; to generate transfer functions for systems. Woo!
 - Polynomial models are vital in representing system transfer functions, which describe the relationship between inputs and outputs of a dynamic system. By mapping polynomials to transfer functions, engineers can model the behavior of diverse systems across various domains, including aerospace, automotive, and industrial control.
-- For instance, in control systems engineering, polynomials are transformed into transfer functions to characterise the dynamics of physical systems, such as aircraft, vehicles, and manufacturing processes! These transfer functions capture the system's response to inputs and enable engineers to design control algorithms to achieve desired performance objectives, such as stability, responsiveness, and robustness.
+- For instance, in control systems engineering, polynomials are transformed into transfer functions to characterise the dynamics of physical systems, such as aircraft, vehicles, and manufacturing processes! 
+- These transfer functions capture the system's response to inputs and enable engineers to design control algorithms to achieve desired performance objectives, such as stability, responsiveness, and robustness.
 - With transfer functions derived from polynomials, engineers can perform advanced control systems analysis techniques, such as Root-Locus, frequency response analysis, and pole-zero analysis.
 
 **Control System Applications**
-- In industrial automation, polynomial controllers are used to regulate robotic arm movements in manufacturing processes. For example, in automotive assembly lines, polynomial-based controllers ensure accurate positioning of robotic arms for welding and assembly tasks. 
-
+- In industrial automation, polynomial controllers regulate motors by translating input commands into precise motor outputs. 
+- By applying specific inputs and measuring corresponding outputs, such as speed or torque, engineers optimise manufacturing processes. 
+- For example, in controlling fluid pump outputs, polynomial controllers enable adjustments to achieve desired pressure levels or flow rates, enhancing efficiency and product quality.
 
 ## Features
 
