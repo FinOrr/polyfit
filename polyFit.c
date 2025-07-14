@@ -1,269 +1,422 @@
 /**
  ******************************************************************************
- * @file polyFit.c
- * @brief   Source file for fitting polynomials to datasets.
+ * @file    polyfit.c
+ * @brief   Implementation of polynomial fitting and evaluation library
+ * @version 1.0
+ * @date    2025
  ******************************************************************************
  * @attention
  *
- * This file is heavily dependent on dynamic memory allocation, ew.
- * I had to develop this quickly over a day and test on the host machine.
- * Malloc was faster to develop with, but I know it is not ideal for embedded.
- * Will refactor to static alloc when I have the time ಥ_ಥ
+ * This implementation provides robust polynomial fitting using least squares
+ * regression with proper error handling and memory management.
  *
  ******************************************************************************
  */
 
-#include "polyFit.h"
+#include "polyfit.h"
 
-/**
- * @brief Initialise a polynomial and return a pointer to it.
- *
- * @param degree Degree of the polynomial.
- * @return Pointer to the Initialised polynomial.
- */
-Polynomial *initPolynomial(int32_t degree) {
+/*============================================================================*/
+/* PRIVATE FUNCTION DECLARATIONS                                             */
+/*============================================================================*/
+
+static polyfit_error_t gaussian_elimination(float **A, float *B, float *x,
+                                            int32_t n);
+static polyfit_error_t allocate_matrix(float ***matrix, int32_t rows,
+                                       int32_t cols);
+static void free_matrix(float **matrix, int32_t rows);
+static polyfit_error_t validate_input_arrays(const float *x, const float *y,
+                                             int32_t num_points);
+static bool is_matrix_singular(float **A, int32_t n);
+
+/*============================================================================*/
+/* GLOBAL VARIABLES                                                           */
+/*============================================================================*/
+
+static const polyfit_config_t default_config = {
+    .absolute_threshold = POLYFIT_ABSOLUTE_THRESHOLD,
+    .relative_threshold = POLYFIT_RELATIVE_THRESHOLD,
+    .enable_pivot_check = true};
+
+/*============================================================================*/
+/* PUBLIC FUNCTION IMPLEMENTATIONS                                           */
+/*============================================================================*/
+
+Polynomial *polyfit_init(int32_t degree) {
+  if (degree < 0 || degree > POLYFIT_MAX_DEGREE) {
+    return NULL;
+  }
+
   Polynomial *poly = (Polynomial *)malloc(sizeof(Polynomial));
-
-  // Check if memory allocation was successful
   if (poly == NULL) {
-    // Error: Memory allocation failed for polynomial structure.
-    exit(EXIT_FAILURE);  // or handle the error in a way suitable for your
-                         // application
+    return NULL;
   }
 
-  poly->coefficients = (float *)malloc((degree + 1) * sizeof(float));
-
-  // Check if memory allocation was successful
+  poly->coefficients = (float *)calloc(degree + 1, sizeof(float));
   if (poly->coefficients == NULL) {
-    // Error: Memory allocation failed for polynomial coefficients
-    free(poly);  // free the previously allocated memory for the structure
-    exit(EXIT_FAILURE);  // or handle the error in a way suitable for your
-                         // application
-  }
-
-  // Init coefficients to zero
-  for (int32_t i = 0; i <= degree; ++i) {
-    poly->coefficients[i] = 0.0;
+    free(poly);
+    return NULL;
   }
 
   poly->degree = degree;
-  return (poly);
+  poly->is_valid = true;
+
+  return poly;
 }
 
-/**
- * @brief Free memory allocated for a polynomial.
- *
- * @param poly Pointer to the polynomial to be freed.
- */
-void freePolynomial(Polynomial *poly) { free(poly->coefficients); }
-
-/**
- * @brief Perform Gaussian elimination to solve a system of linear equations.
- *
- * @param A Coefficient matrix.
- * @param B Right-hand side vector.
- * @param x Solution vector.
- * @param n Size of the system.
- */
-void gaussianElimination(float **A, float *B, float *x, int32_t n) {
-  for (int32_t i = 0; i < n; ++i) {
-    // Pivot
-    int32_t max = i;
-    for (int32_t j = i + 1; j < n; ++j) {
-      if (tinyFabs(A[j][i]) > tinyFabs(A[max][i])) {
-        max = j;
-      }
-    }
-
-    // Swap rows i and max
-    float *temp = A[i];
-    A[i] = A[max];
-    A[max] = temp;
-    float t = B[i];
-    B[i] = B[max];
-    B[max] = t;
-
-    // Forward elimination
-    for (int32_t j = i + 1; j < n; ++j) {
-      float f = A[j][i] / A[i][i];
-      for (int32_t k = i; k < n; ++k) {
-        A[j][k] -= A[i][k] * f;
-      }
-      B[j] -= B[i] * f;
-    }
-  }
-
-  // Backward substitution
-  for (int32_t i = n - 1; i >= 0; --i) {
-    for (int32_t j = i + 1; j < n; ++j) {
-      B[i] -= A[i][j] * x[j];
-    }
-    x[i] = B[i] / A[i][i];
+void polyfit_free(Polynomial *poly) {
+  if (poly != NULL) {
+    free(poly->coefficients);
+    poly->coefficients = NULL;
+    poly->degree = -1;
+    poly->is_valid = false;
+    free(poly);
   }
 }
 
-/**
- * @brief Perform least squares polynomial regression.
- *
- * @param x Array of x values.
- * @param y Array of corresponding y values.
- * @param numPoints Number of data points.
- * @param degree Degree of the polynomial regression.
- * @param resultPoly Pointer to store the result polynomial.
- */
-void leastSquaresPolynomialRegression(const float *x, const float *y,
-                                      int32_t numPoints, int32_t degree,
-                                      Polynomial *resultPoly) {
-  // Allocate matrices A and B
-  float **A = (float **)malloc((degree + 1) * sizeof(float *));
-  for (int32_t i = 0; i <= degree; ++i) {
-    A[i] = (float *)malloc((degree + 1) * sizeof(float));
+polyfit_error_t polyfit_least_squares(const float *x, const float *y,
+                                      int32_t num_points, int32_t degree,
+                                      Polynomial *result_poly) {
+  // Input validation
+  if (x == NULL || y == NULL || result_poly == NULL) {
+    return POLYFIT_ERROR_NULL_POINTER;
   }
-  float *B = (float *)malloc((degree + 1) * sizeof(float));
 
-  // Initialise matrices A and B
-  for (int32_t i = 0; i <= degree; ++i) {
-    B[i] = 0.0;
-    for (int32_t j = 0; j <= degree; ++j) {
-      A[i][j] = 0.0;
-      for (int32_t k = 0; k < numPoints; ++k) {
-        A[i][j] += tinyPow(x[k], i + j);
+  if (degree < 0 || degree > POLYFIT_MAX_DEGREE) {
+    return POLYFIT_ERROR_INVALID_DEGREE;
+  }
+
+  if (num_points <= degree) {
+    return POLYFIT_ERROR_INSUFFICIENT_POINTS;
+  }
+
+  polyfit_error_t error = validate_input_arrays(x, y, num_points);
+  if (error != POLYFIT_SUCCESS) {
+    return error;
+  }
+
+  // Allocate matrices
+  float **A = NULL;
+  float *B = NULL;
+
+  error = allocate_matrix(&A, degree + 1, degree + 1);
+  if (error != POLYFIT_SUCCESS) {
+    return error;
+  }
+
+  B = (float *)calloc(degree + 1, sizeof(float));
+  if (B == NULL) {
+    free_matrix(A, degree + 1);
+    return POLYFIT_ERROR_MEMORY_ALLOC;
+  }
+
+  // Build normal equations (A^T * A * coeffs = A^T * y)
+  for (int32_t i = 0; i <= degree; i++) {
+    for (int32_t j = 0; j <= degree; j++) {
+      A[i][j] = 0.0f;
+      for (int32_t k = 0; k < num_points; k++) {
+        A[i][j] += polyfit_pow(x[k], i + j);
       }
     }
-    for (int32_t k = 0; k < numPoints; ++k) {
-      B[i] += y[k] * tinyPow(x[k], i);
+
+    B[i] = 0.0f;
+    for (int32_t k = 0; k < num_points; k++) {
+      B[i] += y[k] * polyfit_pow(x[k], i);
     }
   }
 
-  // Solve the system of linear equations (Ax = B) for coefficients
-  gaussianElimination(A, B, resultPoly->coefficients, degree + 1);
-
-  // Free allocated memory for matrices
-  for (int32_t i = 0; i <= degree; ++i) {
-    free(A[i]);
+  // Check for singular matrix
+  if (is_matrix_singular(A, degree + 1)) {
+    free_matrix(A, degree + 1);
+    free(B);
+    return POLYFIT_ERROR_SINGULAR_MATRIX;
   }
-  free(A);
+
+  // Solve the system
+  error = gaussian_elimination(A, B, result_poly->coefficients, degree + 1);
+
+  // Cleanup
+  free_matrix(A, degree + 1);
   free(B);
+
+  if (error == POLYFIT_SUCCESS) {
+    result_poly->degree = degree;
+    result_poly->is_valid = true;
+  }
+
+  return error;
 }
 
-/**
- * @brief Evaluate the polynomial at a given x value.
- *
- * @param poly Pointer to the polynomial.
- * @param x Value at which to evaluate the polynomial.
- * @return Result of the polynomial evaluation.
- */
-float evaluatePolynomial(const Polynomial *poly, float x) {
-  if (poly == NULL || poly->coefficients == NULL) {
-    return 0.0f;
+polyfit_error_t polyfit_evaluate(const Polynomial *poly, float x,
+                                 float *result) {
+  if (poly == NULL || result == NULL) {
+    return POLYFIT_ERROR_NULL_POINTER;
   }
 
-  float result = 0.0;
-
-  for (int32_t i = 0; i <= poly->degree; ++i) {
-    result += poly->coefficients[i] * tinyPow(x, i);
+  if (!polyfit_is_valid(poly)) {
+    return POLYFIT_ERROR_INVALID_INPUT;
   }
 
-  // Apply a combination of relative and absolute thresholds
-  // Absolute threshold to consider a value negligible
-  float absoluteThreshold = 1e-6;
-  // Relative threshold relative to coefficient magnitudes
-  float relativeThreshold = 1e-6;
+  *result = 0.0f;
 
-  // If the result is close to zero, set it to zero
-  if (tinyFabs(result) <
-          relativeThreshold *
-              getMaxCoefficientMagnitude(poly->coefficients, poly->degree) ||
-      tinyFabs(result) < absoluteThreshold) {
-    result = 0.0f;
+  // Use Horner's method for efficient evaluation
+  for (int32_t i = poly->degree; i >= 0; i--) {
+    *result = *result * x + poly->coefficients[i];
   }
 
-  return (result);
+  // Apply thresholding
+  float max_magnitude;
+  polyfit_get_max_coefficient_magnitude(poly, &max_magnitude);
+
+  if (polyfit_is_nearly_zero(*result, default_config.absolute_threshold) ||
+      polyfit_is_nearly_zero(
+          *result, default_config.relative_threshold * max_magnitude)) {
+    *result = 0.0f;
+  }
+
+  return POLYFIT_SUCCESS;
 }
 
-/**
- * @brief Get the maximum absolute magnitude among the polynomial coefficients.
- *
- * @param coefficients Array of polynomial coefficients.
- * @param degree Degree of the polynomial.
- * @return Maximum absolute magnitude among the coefficients.
- */
-float getMaxCoefficientMagnitude(const float *coefficients, int32_t degree) {
-  if (coefficients == NULL) {
-    return 0.0f;
+polyfit_error_t polyfit_get_max_coefficient_magnitude(const Polynomial *poly,
+                                                      float *max_magnitude) {
+  if (poly == NULL || max_magnitude == NULL) {
+    return POLYFIT_ERROR_NULL_POINTER;
   }
 
-  float maxMagnitude = 0.0;
+  if (!polyfit_is_valid(poly)) {
+    return POLYFIT_ERROR_INVALID_INPUT;
+  }
 
-  for (int32_t i = 0; i <= degree; ++i) {
-    float magnitude = tinyFabs(coefficients[i]);
-    if (magnitude > maxMagnitude) {
-      maxMagnitude = magnitude;
+  *max_magnitude = 0.0f;
+
+  for (int32_t i = 0; i <= poly->degree; i++) {
+    float magnitude = polyfit_fabs(poly->coefficients[i]);
+    if (magnitude > *max_magnitude) {
+      *max_magnitude = magnitude;
     }
   }
 
-  return (maxMagnitude);
+  return POLYFIT_SUCCESS;
 }
 
-/**
- * @brief Function to calculate the power of a base to an exponent.
- * @brief This is to avoid having to link the MASSIVE math.h library.
- * @param base The base value (float).
- * @param exponent The exponent value (signed 32-bit integer).
- * @return Result of base raised to the power of exponent.
- */
-float tinyPow(float base, int32_t exponent) {
-  // Check for special cases
+bool polyfit_is_valid(const Polynomial *poly) {
+  return (poly != NULL && poly->coefficients != NULL && poly->degree >= 0 &&
+          poly->degree <= POLYFIT_MAX_DEGREE && poly->is_valid);
+}
+
+const char *polyfit_error_string(polyfit_error_t error) {
+  switch (error) {
+    case POLYFIT_SUCCESS:
+      return "Success";
+    case POLYFIT_ERROR_NULL_POINTER:
+      return "Null pointer provided";
+    case POLYFIT_ERROR_INVALID_DEGREE:
+      return "Invalid polynomial degree";
+    case POLYFIT_ERROR_MEMORY_ALLOC:
+      return "Memory allocation failed";
+    case POLYFIT_ERROR_SINGULAR_MATRIX:
+      return "Matrix is singular";
+    case POLYFIT_ERROR_INSUFFICIENT_POINTS:
+      return "Insufficient data points";
+    case POLYFIT_ERROR_INVALID_INPUT:
+      return "Invalid input parameters";
+    default:
+      return "Unknown error";
+  }
+}
+
+/*============================================================================*/
+/* UTILITY FUNCTION IMPLEMENTATIONS                                          */
+/*============================================================================*/
+
+float polyfit_pow(float base, int32_t exponent) {
+  // Handle special cases
+  if (exponent == 0) {
+    return 1.0f;
+  }
+
   if (base == 0.0f) {
-    if (exponent == 0) {
-      return 1.0f;  // 0^0 is considered 1 by convention
-    } else if (exponent < 0) {
-      // Handling 0 ^ negative_exponent is undefined, return an error value or
-      // NaN as needed
-      return (0.0f);  // Adjust this according to your specific requirements
-    }
+    return (exponent > 0) ? 0.0f : 1.0f;  // 0^0 = 1 by convention
   }
 
-  // Initialise result
+  if (base == 1.0f) {
+    return 1.0f;
+  }
+
+  if (base == -1.0f) {
+    return (exponent % 2 == 0) ? 1.0f : -1.0f;
+  }
+
+  // Use binary exponentiation
   float result = 1.0f;
+  float current_base = base;
+  int32_t abs_exponent = (exponent < 0) ? -exponent : exponent;
 
-  // Determine the positive or negative exponent
-  int32_t absExponent = exponent > 0 ? exponent : -exponent;
-
-  // Calculate power using binary exponentiation for efficiency
-  while (absExponent > 0) {
-    if (absExponent % 2 == 1) {
-      result *= base;
+  while (abs_exponent > 0) {
+    if (abs_exponent & 1) {
+      result *= current_base;
     }
-    base *= base;
-    absExponent /= 2;
+    current_base *= current_base;
+    abs_exponent >>= 1;
   }
 
-  // Adjust result for negative exponent
-  if (exponent < 0) {
-    result = 1.0f / result;
-  }
-
-  return (result);
+  return (exponent < 0) ? (1.0f / result) : result;
 }
 
-/**
- * @brief Calculate the absolute value of a floating-point number.
- * @param x The input floating-point number.
- * @return Absolute value of x.
- */
-float tinyFabs(float x) {
-  // Handle NaN (Not-a-Number)
-  if (!(x == x)) {
-    // Return NaN if x is NaN
-    return (x);
+float polyfit_fabs(float x) {
+  // Handle NaN
+  if (x != x) {
+    return x;
   }
 
-  // Handle negative zero
-  if (x == 0.0f && *((uint32_t *)&x) & 0x80000000) {
-    // Return positive zero if x is negative zero
-    return (0.0f);
+  // Use bit manipulation for efficiency
+  union {
+    float f;
+    uint32_t i;
+  } u;
+
+  u.f = x;
+  u.i &= 0x7FFFFFFF;  // Clear sign bit
+
+  return u.f;
+}
+
+bool polyfit_is_nearly_zero(float value, float threshold) {
+  return polyfit_fabs(value) < threshold;
+}
+
+/*============================================================================*/
+/* PRIVATE FUNCTION IMPLEMENTATIONS                                          */
+/*============================================================================*/
+
+static polyfit_error_t gaussian_elimination(float **A, float *B, float *x,
+                                            int32_t n) {
+  if (A == NULL || B == NULL || x == NULL || n <= 0) {
+    return POLYFIT_ERROR_NULL_POINTER;
   }
 
-  return ((x < 0.0f) ? -x : x);
+  const float pivot_threshold = 1e-12f;
+
+  // Forward elimination with partial pivoting
+  for (int32_t i = 0; i < n; i++) {
+    // Find pivot
+    int32_t max_row = i;
+    for (int32_t k = i + 1; k < n; k++) {
+      if (polyfit_fabs(A[k][i]) > polyfit_fabs(A[max_row][i])) {
+        max_row = k;
+      }
+    }
+
+    // Check for singular matrix
+    if (polyfit_fabs(A[max_row][i]) < pivot_threshold) {
+      return POLYFIT_ERROR_SINGULAR_MATRIX;
+    }
+
+    // Swap rows
+    if (max_row != i) {
+      float *temp_row = A[i];
+      A[i] = A[max_row];
+      A[max_row] = temp_row;
+
+      float temp_b = B[i];
+      B[i] = B[max_row];
+      B[max_row] = temp_b;
+    }
+
+    // Eliminate column
+    for (int32_t k = i + 1; k < n; k++) {
+      float factor = A[k][i] / A[i][i];
+      for (int32_t j = i; j < n; j++) {
+        A[k][j] -= factor * A[i][j];
+      }
+      B[k] -= factor * B[i];
+    }
+  }
+
+  // Back substitution
+  for (int32_t i = n - 1; i >= 0; i--) {
+    x[i] = B[i];
+    for (int32_t j = i + 1; j < n; j++) {
+      x[i] -= A[i][j] * x[j];
+    }
+    x[i] /= A[i][i];
+  }
+
+  return POLYFIT_SUCCESS;
+}
+
+static polyfit_error_t allocate_matrix(float ***matrix, int32_t rows,
+                                       int32_t cols) {
+  if (matrix == NULL || rows <= 0 || cols <= 0) {
+    return POLYFIT_ERROR_NULL_POINTER;
+  }
+
+  *matrix = (float **)malloc(rows * sizeof(float *));
+  if (*matrix == NULL) {
+    return POLYFIT_ERROR_MEMORY_ALLOC;
+  }
+
+  for (int32_t i = 0; i < rows; i++) {
+    (*matrix)[i] = (float *)calloc(cols, sizeof(float));
+    if ((*matrix)[i] == NULL) {
+      // Clean up previously allocated rows
+      for (int32_t j = 0; j < i; j++) {
+        free((*matrix)[j]);
+      }
+      free(*matrix);
+      *matrix = NULL;
+      return POLYFIT_ERROR_MEMORY_ALLOC;
+    }
+  }
+
+  return POLYFIT_SUCCESS;
+}
+
+static void free_matrix(float **matrix, int32_t rows) {
+  if (matrix != NULL) {
+    for (int32_t i = 0; i < rows; i++) {
+      free(matrix[i]);
+    }
+    free(matrix);
+  }
+}
+
+static polyfit_error_t validate_input_arrays(const float *x, const float *y,
+                                             int32_t num_points) {
+  if (x == NULL || y == NULL) {
+    return POLYFIT_ERROR_NULL_POINTER;
+  }
+
+  if (num_points <= 0) {
+    return POLYFIT_ERROR_INVALID_INPUT;
+  }
+
+  // Check for NaN or infinite values
+  for (int32_t i = 0; i < num_points; i++) {
+    if (x[i] != x[i] || y[i] != y[i]) {  // NaN check
+      return POLYFIT_ERROR_INVALID_INPUT;
+    }
+  }
+
+  return POLYFIT_SUCCESS;
+}
+
+static bool is_matrix_singular(float **A, int32_t n) {
+  const float determinant_threshold = 1e-12f;
+
+  // Simple check: if any diagonal element is too small after partial pivoting
+  for (int32_t i = 0; i < n; i++) {
+    float max_in_column = 0.0f;
+    for (int32_t j = i; j < n; j++) {
+      float abs_val = polyfit_fabs(A[j][i]);
+      if (abs_val > max_in_column) {
+        max_in_column = abs_val;
+      }
+    }
+
+    if (max_in_column < determinant_threshold) {
+      return true;
+    }
+  }
+
+  return false;
 }

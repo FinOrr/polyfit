@@ -1,100 +1,103 @@
 # PolyFit
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![GitHub top language](https://img.shields.io/github/languages/top/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit)
-[![GitHub issues](https://img.shields.io/github/issues/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/pulls)
+[![Top Language](https://img.shields.io/github/languages/top/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit)
+[![Issues](https://img.shields.io/github/issues/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/pulls)
 
+A lightweight C library for fitting polynomials to data—fast, simple, and no external dependencies.
 
-## Overview
+## What is it?
 
-**PolyFit** is a C library designed to facilitate accurate polynomial fitting for curve approximation, allowing for interpolation and extrapolation of data points. With just a few input datapoints, you can model your system quickly and efficiently.
+**PolyFit** is a small, embeddable C library for polynomial regression. 
+It helps you fit a curve through a set of data points so you can interpolate or extrapolate with minimal effort. 
 
-## Use Case Scenarios
+Whether you're smoothing a signal, modeling system behavior, or generating transfer functions, polyfit is built to drop into your project and get out of your way.
 
-Sound a bit asbtract? No worries, here's some examples of where PolyFit might help solve your problem.
+---
 
-**Signal Processing and Filtering**
-- Biomedical engineers use polynomial filters to remove noise from electroencephalogram (EEG) signals within neuroscience research, improving the detection of brainwave patterns and facilitating the diagnosis of neurological disorders.
+## Where It’s Useful
 
-**Financial Modeling and Time Series Analysis**
-- Financial analysts utilise polynomial regression models to analyse market data and predict prices. For example, in investment banking, polynomial models are employed to forecast future stock prices, aiding investors in making informed trading decisions.
+Here's a few real-world uses:
 
-**Robotics and Path Planning**
-- Autonomous drones use polynomial trajectories for path planning in search and rescue missions. For instance, in disaster response scenarios, drones navigate through complex environments by following smooth polynomial paths, enabling efficient search operations and rescuing survivors. Think:
-  - feature trajectory estimation;
-  - motion model for localisation;
-  - map building and refinement; and
-  - sensor calibration.
+### 📈 Signal Processing
+Useful in cleaning up noisy data—e.g., smoothing biomedical signals like EEGs.
 
-**Transform Functions and Control Systems**
-- This was the original purpose of the library; to generate transfer functions for systems. Woo!
-- Polynomial models are vital in representing system transfer functions, which describe the relationship between inputs and outputs of a dynamic system. By mapping polynomials to transfer functions, engineers can model the behavior of diverse systems across various domains, including aerospace, automotive, and industrial control.
-- For instance, in control systems engineering, polynomials are transformed into transfer functions to characterise the dynamics of physical systems, such as aircraft, vehicles, and manufacturing processes! These transfer functions capture the system's response to inputs and enable engineers to design control algorithms to achieve desired performance objectives, such as stability, responsiveness, and robustness.
-- With transfer functions derived from polynomials, engineers can perform advanced control systems analysis techniques, such as Root-Locus, frequency response analysis, and pole-zero analysis.
+### 🤖 Robotics & Navigation
+Model sensor noise, trajectory paths, or estimate system motion with smooth, continuous polynomials.
+
+### 🛠 Control Systems
+Originally built to model dynamic systems using polynomial-based transfer functions. Great for:
+- Root locus
+- Frequency response
+- Pole-zero plots
+
+---
 
 ## Features
 
-- Polynomial fitting for curve approximation.
-- Interpolation and extrapolation functionality for predicting additional data points.
-- Lightweight and easy-to-integrate into existing C projects.
+- Polynomial curve fitting with configurable order
+- Supports both interpolation and extrapolation
+- Single-file: just drop in `polyfit.c` and `polyfit.h`
+- No dependencies beyond the standard library
 
-## Usage
+---
 
-### Installation
+## Quickstart
 
-Clone the repository:
+### Clone the Repo
 
 ```bash
 git clone https://github.com/FinOrr/polyfit.git
-```
+````
 
-Copy the polyFit.c and polyFit.h files into your project directory.
+Then just copy `polyfit.c` and `polyfit.h` into your project.
 
-Include the polyFit.h header file in your source files where you want to use the polynomial regression functionality.
+### Include It
 
 ```c
-#include "polyFit.h"
+#include "polyfit.h"
 ```
 
-### Example
+### Build the Demo (Optional)
 
-See the demo.c program for example usage.
-To build the demo, you'll need CMake installed.
-
-Open a terminal, navigate to the directory containing your source files and the CMakeLists.txt, and run the following commands:
+There's a `demo.c` to try things out:
 
 ```bash
 mkdir build
 cd build
 cmake ..
-```
-
-This will generate the build files. Once the files are generated, you can build your project by running:
-```bash
 make
 ```
 
-This will compile your source files and create the executable. If you want to clean the generated files, you can run:
+To clean up:
+
 ```bash
 make clean
 ```
 
-The resulting executable will be in the build directory.
+The compiled binary will land in the `build/` folder.
+
+---
 
 ## Documentation
 
-Detailed documentation can be found in the [Wiki](https://github.com/FinOrr/polyfit/wiki).
+More detailed info and examples are available on the [Wiki](https://github.com/FinOrr/polyfit/wiki).
+
+---
 
 ## Contributing
 
-Contributions are welcome! Please check the [Contribution Guidelines](CONTRIBUTING.md) before making a pull request.
+Found a bug? Want to improve performance or add features? PRs welcome, just read the [contributing guide](CONTRIBUTING.md) first.
+
+---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-  
-## Contact
+MIT. See [LICENSE](LICENSE) for full details.
 
-For any inquiries or support, please use the [Issues](https://github.com/FinOrr/polyfit/issues) page.
- 
+---
+
+## Questions?
+
+Open an [issue](https://github.com/FinOrr/polyfit/issues) if you get stuck or want to ask anything.
