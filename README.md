@@ -20,13 +20,13 @@ Whether you're smoothing a signal, modeling system behavior, or generating trans
 
 Here's a few real-world uses:
 
-### 📈 Signal Processing
-Useful in cleaning up noisy data—e.g., smoothing biomedical signals like EEGs.
+### Signal Processing
+Useful in cleaning up noisy data e.g., smoothing biomedical signals like EEGs.
 
-### 🤖 Robotics & Navigation
+### Robotics & Navigation
 Model sensor noise, trajectory paths, or estimate system motion with smooth, continuous polynomials.
 
-### 🛠 Control Systems
+### Control Systems
 Originally built to model dynamic systems using polynomial-based transfer functions. Great for:
 - Root locus
 - Frequency response
