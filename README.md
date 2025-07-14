@@ -1,103 +1,71 @@
-# PolyFit
+# polyfit
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Top Language](https://img.shields.io/github/languages/top/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit)
 [![Issues](https://img.shields.io/github/issues/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/pulls)
 
-A lightweight C library for fitting polynomials to data—fast, simple, and no external dependencies.
+A lightweight C library for fitting polynomials to data: fast, simple, and no external dependencies.
 
-## What is it?
+## API
 
-**PolyFit** is a small, embeddable C library for polynomial regression. 
-It helps you fit a curve through a set of data points so you can interpolate or extrapolate with minimal effort. 
+```c
+// Fit and return a polynomial (caller must free)
+Polynomial *polyfit(const float *x, const float *y, int32_t num_points,
+                    int32_t degree, polyfit_error_t *error);
 
-Whether you're smoothing a signal, modeling system behavior, or generating transfer functions, polyfit is built to drop into your project and get out of your way.
+// Evaluate a fitted polynomial at x
+polyfit_error_t polyfit_evaluate(const Polynomial *poly, float x, float *result);
 
----
+// Fit and evaluate at a single point (no memory management required)
+polyfit_error_t polyfit_eval_at(const float *x, const float *y,
+                                int32_t num_points, int32_t degree,
+                                float eval_x, float *result);
 
-## Where It’s Useful
+// Copy coefficients out (ascending order: coeffs[0] + coeffs[1]*x + ...)
+polyfit_error_t polyfit_get_coefficients(const Polynomial *poly,
+                                         float *coeffs, int32_t size);
 
-Here's a few real-world uses:
+void polyfit_free(Polynomial *poly);
+const char *polyfit_error_string(polyfit_error_t error);
+```
 
-### 📈 Signal Processing
-Useful in cleaning up noisy data—e.g., smoothing biomedical signals like EEGs.
+Supported degrees: 0 - 10. Requires more data points than the polynomial degree.
 
-### 🤖 Robotics & Navigation
-Model sensor noise, trajectory paths, or estimate system motion with smooth, continuous polynomials.
-
-### 🛠 Control Systems
-Originally built to model dynamic systems using polynomial-based transfer functions. Great for:
-- Root locus
-- Frequency response
-- Pole-zero plots
-
----
-
-## Features
-
-- Polynomial curve fitting with configurable order
-- Supports both interpolation and extrapolation
-- Single-file: just drop in `polyfit.c` and `polyfit.h`
-- No dependencies beyond the standard library
-
----
-
-## Quickstart
-
-### Clone the Repo
-
-```bash
-git clone https://github.com/FinOrr/polyfit.git
-````
-
-Then just copy `polyfit.c` and `polyfit.h` into your project.
-
-### Include It
+## Usage
 
 ```c
 #include "polyfit.h"
+#include <stdio.h>
+
+int main(void) {
+    float x[] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+    float y[] = {2.1f, 3.9f, 6.1f, 8.0f, 9.9f};
+
+    Polynomial *poly = polyfit(x, y, 5, 1, NULL);
+    if (poly) {
+        float result;
+        polyfit_evaluate(poly, 6.0f, &result);
+        printf("f(6.0) = %f\n", result);
+        polyfit_free(poly);
+    }
+
+    // Or fit and evaluate in one call
+    float result;
+    polyfit_eval_at(x, y, 5, 1, 6.0f, &result);
+
+    return 0;
+}
 ```
-
-### Build the Demo (Optional)
-
-There's a `demo.c` to try things out:
 
 ```bash
-mkdir build
-cd build
-cmake ..
-make
+gcc -o myapp main.c polyfit.c -lm
 ```
-
-To clean up:
-
-```bash
-make clean
-```
-
-The compiled binary will land in the `build/` folder.
-
----
-
-## Documentation
-
-More detailed info and examples are available on the [Wiki](https://github.com/FinOrr/polyfit/wiki).
-
----
 
 ## Contributing
 
-Found a bug? Want to improve performance or add features? PRs welcome, just read the [contributing guide](CONTRIBUTING.md) first.
-
----
+PRs welcome -- see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT. See [LICENSE](LICENSE) for full details.
-
----
-
-## Questions?
-
-Open an [issue](https://github.com/FinOrr/polyfit/issues) if you get stuck or want to ask anything.
+MIT. See [LICENSE](LICENSE).
