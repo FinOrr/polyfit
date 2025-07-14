@@ -59,25 +59,6 @@ Then just copy `polyfit.c` and `polyfit.h` into your project.
 #include "polyfit.h"
 ```
 
-### Build the Demo (Optional)
-
-There's a `demo.c` to try things out:
-
-```bash
-mkdir build
-cd build
-cmake ..
-make
-```
-
-To clean up:
-
-```bash
-make clean
-```
-
-The compiled binary will land in the `build/` folder.
-
 ---
 
 ## Documentation
