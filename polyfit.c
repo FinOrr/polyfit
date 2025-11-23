@@ -19,14 +19,14 @@
 /* PRIVATE FUNCTION DECLARATIONS                                             */
 /*============================================================================*/
 
-static polyfit_error_t gaussian_elimination(float **A, float *B, float *x,
+static polyfit_error_t gaussian_elimination(float** A, float* B, float* x,
                                             int32_t n);
-static polyfit_error_t allocate_matrix(float ***matrix, int32_t rows,
+static polyfit_error_t allocate_matrix(float*** matrix, int32_t rows,
                                        int32_t cols);
-static void free_matrix(float **matrix, int32_t rows);
-static polyfit_error_t validate_input_arrays(const float *x, const float *y,
+static void free_matrix(float** matrix, int32_t rows);
+static polyfit_error_t validate_input_arrays(const float* x, const float* y,
                                              int32_t num_points);
-static bool is_matrix_singular(float **A, int32_t n);
+static bool is_matrix_singular(float** A, int32_t n);
 
 /*============================================================================*/
 /* GLOBAL VARIABLES                                                           */
@@ -41,17 +41,17 @@ static const polyfit_config_t default_config = {
 /* PUBLIC FUNCTION IMPLEMENTATIONS                                           */
 /*============================================================================*/
 
-Polynomial *polyfit_init(int32_t degree) {
+Polynomial* polyfit_init(int32_t degree) {
   if (degree < 0 || degree > POLYFIT_MAX_DEGREE) {
     return NULL;
   }
 
-  Polynomial *poly = (Polynomial *)malloc(sizeof(Polynomial));
+  Polynomial* poly = (Polynomial*)malloc(sizeof(Polynomial));
   if (poly == NULL) {
     return NULL;
   }
 
-  poly->coefficients = (float *)calloc(degree + 1, sizeof(float));
+  poly->coefficients = (float*)calloc(degree + 1, sizeof(float));
   if (poly->coefficients == NULL) {
     free(poly);
     return NULL;
@@ -63,7 +63,7 @@ Polynomial *polyfit_init(int32_t degree) {
   return poly;
 }
 
-void polyfit_free(Polynomial *poly) {
+void polyfit_free(Polynomial* poly) {
   if (poly != NULL) {
     free(poly->coefficients);
     poly->coefficients = NULL;
@@ -73,9 +73,9 @@ void polyfit_free(Polynomial *poly) {
   }
 }
 
-polyfit_error_t polyfit_least_squares(const float *x, const float *y,
+polyfit_error_t polyfit_least_squares(const float* x, const float* y,
                                       int32_t num_points, int32_t degree,
-                                      Polynomial *result_poly) {
+                                      Polynomial* result_poly) {
   // Input validation
   if (x == NULL || y == NULL || result_poly == NULL) {
     return POLYFIT_ERROR_NULL_POINTER;
@@ -95,15 +95,15 @@ polyfit_error_t polyfit_least_squares(const float *x, const float *y,
   }
 
   // Allocate matrices
-  float **A = NULL;
-  float *B = NULL;
+  float** A = NULL;
+  float* B = NULL;
 
   error = allocate_matrix(&A, degree + 1, degree + 1);
   if (error != POLYFIT_SUCCESS) {
     return error;
   }
 
-  B = (float *)calloc(degree + 1, sizeof(float));
+  B = (float*)calloc(degree + 1, sizeof(float));
   if (B == NULL) {
     free_matrix(A, degree + 1);
     return POLYFIT_ERROR_MEMORY_ALLOC;
@@ -146,8 +146,8 @@ polyfit_error_t polyfit_least_squares(const float *x, const float *y,
   return error;
 }
 
-polyfit_error_t polyfit_evaluate(const Polynomial *poly, float x,
-                                 float *result) {
+polyfit_error_t polyfit_evaluate(const Polynomial* poly, float x,
+                                 float* result) {
   if (poly == NULL || result == NULL) {
     return POLYFIT_ERROR_NULL_POINTER;
   }
@@ -176,8 +176,8 @@ polyfit_error_t polyfit_evaluate(const Polynomial *poly, float x,
   return POLYFIT_SUCCESS;
 }
 
-polyfit_error_t polyfit_get_max_coefficient_magnitude(const Polynomial *poly,
-                                                      float *max_magnitude) {
+polyfit_error_t polyfit_get_max_coefficient_magnitude(const Polynomial* poly,
+                                                      float* max_magnitude) {
   if (poly == NULL || max_magnitude == NULL) {
     return POLYFIT_ERROR_NULL_POINTER;
   }
@@ -198,12 +198,12 @@ polyfit_error_t polyfit_get_max_coefficient_magnitude(const Polynomial *poly,
   return POLYFIT_SUCCESS;
 }
 
-bool polyfit_is_valid(const Polynomial *poly) {
+bool polyfit_is_valid(const Polynomial* poly) {
   return (poly != NULL && poly->coefficients != NULL && poly->degree >= 0 &&
           poly->degree <= POLYFIT_MAX_DEGREE && poly->is_valid);
 }
 
-const char *polyfit_error_string(polyfit_error_t error) {
+const char* polyfit_error_string(polyfit_error_t error) {
   switch (error) {
     case POLYFIT_SUCCESS:
       return "Success";
@@ -222,6 +222,88 @@ const char *polyfit_error_string(polyfit_error_t error) {
     default:
       return "Unknown error";
   }
+}
+
+/*============================================================================*/
+/* CONVENIENCE FUNCTION IMPLEMENTATIONS                                      */
+/*============================================================================*/
+
+Polynomial* polyfit(const float* x, const float* y, int32_t num_points,
+                    int32_t degree, polyfit_error_t* error) {
+  polyfit_error_t local_error;
+
+  // Initialize polynomial
+  Polynomial* poly = polyfit_init(degree);
+  if (poly == NULL) {
+    local_error = POLYFIT_ERROR_MEMORY_ALLOC;
+    if (error != NULL) {
+      *error = local_error;
+    }
+    return NULL;
+  }
+
+  // Fit the polynomial
+  local_error = polyfit_least_squares(x, y, num_points, degree, poly);
+  if (local_error != POLYFIT_SUCCESS) {
+    polyfit_free(poly);
+    if (error != NULL) {
+      *error = local_error;
+    }
+    return NULL;
+  }
+
+  if (error != NULL) {
+    *error = POLYFIT_SUCCESS;
+  }
+
+  return poly;
+}
+
+polyfit_error_t polyfit_eval_at(const float* x, const float* y,
+                                int32_t num_points, int32_t degree,
+                                float eval_x, float* result) {
+  if (result == NULL) {
+    return POLYFIT_ERROR_NULL_POINTER;
+  }
+
+  // Fit the polynomial
+  Polynomial* poly = polyfit(x, y, num_points, degree, NULL);
+  if (poly == NULL) {
+    // Determine which error occurred by trying again with error output
+    polyfit_error_t error;
+    polyfit(x, y, num_points, degree, &error);
+    return error;
+  }
+
+  // Evaluate at the specified point
+  polyfit_error_t error = polyfit_evaluate(poly, eval_x, result);
+
+  // Clean up
+  polyfit_free(poly);
+
+  return error;
+}
+
+polyfit_error_t polyfit_get_coefficients(const Polynomial* poly, float* coeffs,
+                                         int32_t size) {
+  if (poly == NULL || coeffs == NULL) {
+    return POLYFIT_ERROR_NULL_POINTER;
+  }
+
+  if (!polyfit_is_valid(poly)) {
+    return POLYFIT_ERROR_INVALID_INPUT;
+  }
+
+  if (size < poly->degree + 1) {
+    return POLYFIT_ERROR_INVALID_INPUT;
+  }
+
+  // Copy coefficients to user array
+  for (int32_t i = 0; i <= poly->degree; i++) {
+    coeffs[i] = poly->coefficients[i];
+  }
+
+  return POLYFIT_SUCCESS;
 }
 
 /*============================================================================*/
@@ -288,7 +370,7 @@ bool polyfit_is_nearly_zero(float value, float threshold) {
 /* PRIVATE FUNCTION IMPLEMENTATIONS                                          */
 /*============================================================================*/
 
-static polyfit_error_t gaussian_elimination(float **A, float *B, float *x,
+static polyfit_error_t gaussian_elimination(float** A, float* B, float* x,
                                             int32_t n) {
   if (A == NULL || B == NULL || x == NULL || n <= 0) {
     return POLYFIT_ERROR_NULL_POINTER;
@@ -313,7 +395,7 @@ static polyfit_error_t gaussian_elimination(float **A, float *B, float *x,
 
     // Swap rows
     if (max_row != i) {
-      float *temp_row = A[i];
+      float* temp_row = A[i];
       A[i] = A[max_row];
       A[max_row] = temp_row;
 
@@ -344,19 +426,19 @@ static polyfit_error_t gaussian_elimination(float **A, float *B, float *x,
   return POLYFIT_SUCCESS;
 }
 
-static polyfit_error_t allocate_matrix(float ***matrix, int32_t rows,
+static polyfit_error_t allocate_matrix(float*** matrix, int32_t rows,
                                        int32_t cols) {
   if (matrix == NULL || rows <= 0 || cols <= 0) {
     return POLYFIT_ERROR_NULL_POINTER;
   }
 
-  *matrix = (float **)malloc(rows * sizeof(float *));
+  *matrix = (float**)malloc(rows * sizeof(float*));
   if (*matrix == NULL) {
     return POLYFIT_ERROR_MEMORY_ALLOC;
   }
 
   for (int32_t i = 0; i < rows; i++) {
-    (*matrix)[i] = (float *)calloc(cols, sizeof(float));
+    (*matrix)[i] = (float*)calloc(cols, sizeof(float));
     if ((*matrix)[i] == NULL) {
       // Clean up previously allocated rows
       for (int32_t j = 0; j < i; j++) {
@@ -371,7 +453,7 @@ static polyfit_error_t allocate_matrix(float ***matrix, int32_t rows,
   return POLYFIT_SUCCESS;
 }
 
-static void free_matrix(float **matrix, int32_t rows) {
+static void free_matrix(float** matrix, int32_t rows) {
   if (matrix != NULL) {
     for (int32_t i = 0; i < rows; i++) {
       free(matrix[i]);
@@ -380,7 +462,7 @@ static void free_matrix(float **matrix, int32_t rows) {
   }
 }
 
-static polyfit_error_t validate_input_arrays(const float *x, const float *y,
+static polyfit_error_t validate_input_arrays(const float* x, const float* y,
                                              int32_t num_points) {
   if (x == NULL || y == NULL) {
     return POLYFIT_ERROR_NULL_POINTER;
@@ -400,7 +482,7 @@ static polyfit_error_t validate_input_arrays(const float *x, const float *y,
   return POLYFIT_SUCCESS;
 }
 
-static bool is_matrix_singular(float **A, int32_t n) {
+static bool is_matrix_singular(float** A, int32_t n) {
   const float determinant_threshold = 1e-12f;
 
   // Simple check: if any diagonal element is too small after partial pivoting

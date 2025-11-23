@@ -12,7 +12,7 @@ A lightweight C library for fitting polynomials to data—fast, simple, and no e
 **PolyFit** is a small, embeddable C library for polynomial regression. 
 It helps you fit a curve through a set of data points so you can interpolate or extrapolate with minimal effort. 
 
-Whether you're smoothing a signal, modeling system behavior, or generating transfer functions, polyfit is built to drop into your project and get out of your way.
+Use PolyFit for signal smoothing, approximating system behavior, or forming simple transfer-function polynomials. Include the two source files and call the API; no extra setup required.
 
 ---
 
@@ -57,6 +57,84 @@ Then just copy `polyfit.c` and `polyfit.h` into your project.
 
 ```c
 #include "polyfit.h"
+```
+
+### Basic Usage
+
+**Example 1: Simple linear fit (recommended)**
+
+```c
+#include "polyfit.h"
+#include <stdio.h>
+
+int main(void) {
+    // Your data points
+    float x[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    float y[] = {2.1, 3.9, 6.1, 8.0, 9.9};
+
+    // Fit a linear polynomial (degree 1)
+    Polynomial *poly = polyfit(x, y, 5, 1, NULL);
+    if (poly) {
+        float result;
+        polyfit_evaluate(poly, 6.0f, &result);
+        printf("f(6.0) = %f\n", result);  // Predict at x=6
+        polyfit_free(poly);
+    }
+
+    return 0;
+}
+```
+
+**Example 2: One-shot evaluation (no memory management)**
+
+```c
+// Fit and evaluate in one call - perfect for quick predictions
+float x[] = {0.0, 1.0, 2.0, 3.0};
+float y[] = {1.0, 2.0, 5.0, 10.0};
+float result;
+
+if (polyfit_eval_at(x, y, 4, 2, 4.0f, &result) == POLYFIT_SUCCESS) {
+    printf("f(4.0) = %f\n", result);
+}
+```
+
+**Example 3: Extract coefficients**
+
+```c
+Polynomial *poly = polyfit(x, y, 5, 2, NULL);
+if (poly) {
+    float coeffs[3];  // degree + 1
+    if (polyfit_get_coefficients(poly, coeffs, 3) == POLYFIT_SUCCESS) {
+        printf("y = %.2f + %.2f*x + %.2f*x^2\n",
+               coeffs[0], coeffs[1], coeffs[2]);
+    }
+    polyfit_free(poly);
+}
+```
+
+**Example 4: Error handling**
+
+```c
+polyfit_error_t err;
+Polynomial *poly = polyfit(x, y, num_points, degree, &err);
+if (!poly) {
+    fprintf(stderr, "Error: %s\n", polyfit_error_string(err));
+    return -1;
+}
+// Use polynomial...
+polyfit_free(poly);
+```
+
+### Integration
+
+Just copy these two files into your project:
+- `polyfit.c`
+- `polyfit.h`
+
+Then compile with your source code:
+
+```bash
+gcc -o myapp main.c polyfit.c -lm
 ```
 
 ---
