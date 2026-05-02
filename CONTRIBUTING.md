@@ -1,6 +1,6 @@
 # Contributing to PolyFit Extrapolator
 
-Thank you for your interest in contributing to PolyFit! 
+Thank you for your interest in contributing to PolyFitExtrapolator! 
 By contributing to this project, you help make it better.
 
 ## How to Contribute

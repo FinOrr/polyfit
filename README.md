@@ -1,267 +1,162 @@
 # PolyFit
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![GitHub top language](https://img.shields.io/github/languages/top/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit)
-[![GitHub issues](https://img.shields.io/github/issues/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/pulls)
+[![Top Language](https://img.shields.io/github/languages/top/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit)
+[![Issues](https://img.shields.io/github/issues/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/pulls)
 
-## Overview
+A lightweight C library for fitting polynomials to data—fast, simple, and no external dependencies.
 
-**PolyFit** is a C library designed to facilitate accurate polynomial fitting for curve approximation, allowing for interpolation and extrapolation of data. With just a few input datapoints, you can model your system quickly and efficiently.
+## What is it?
+
+**PolyFit** is a small, embeddable C library for polynomial regression. 
+It helps you fit a curve through a set of data points so you can interpolate or extrapolate with minimal effort. 
+
+Use PolyFit for signal smoothing, approximating system behavior, or forming simple transfer-function polynomials. Include the two source files and call the API; no extra setup required.
+
+---
+
+## Where It’s Useful
+
+Here's a few real-world uses:
+
+### Signal Processing
+Useful in cleaning up noisy data e.g., smoothing biomedical signals like EEGs.
+
+### Robotics & Navigation
+Model sensor noise, trajectory paths, or estimate system motion with smooth, continuous polynomials.
+
+### Control Systems
+Originally built to model dynamic systems using polynomial-based transfer functions. Great for:
+- Root locus
+- Frequency response
+- Pole-zero plots
+
+---
 
 ## Features
 
-- Polynomial fitting for curve approximation.
+- Polynomial curve fitting with configurable order
+- Supports both interpolation and extrapolation
+- Single-file: just drop in `polyfit.c` and `polyfit.h`
+- No dependencies beyond the standard library
 
-- Interpolation and extrapolation functionality for predicting additional data points.
+---
 
-- Lightweight and easy-to-integrate into existing C projects.
+## Quickstart
 
-## Table of Contents
+### Clone the Repo
 
-1. [Use Case Scenarios](#use-case-scenarios)
-2. [Project Status](#project-status)
-3. [Getting Started](#getting-started)
-    1. [Requirements](#requirements)
-        1. [git-lfs](#git-lfs)
-        1. [CMake Build System](#cmake-build-system)
-    2. [Getting the Source](#getting-the-source)
-    3. [Building](#building)
-    4. [Testing](#testing)
-5. [Documentation](#documentation)
-6. [Need Help?](#need-help)
-7. [Contributing](#contributing)
-8. [Further Reading](#further-reading)
-9. [Authors](#authors)
-10. [License](#license)
-11. [Acknowledgments](#acknowledgements)
+```bash
+git clone https://github.com/FinOrr/polyfit.git
+````
 
-## Use Case Scenarios
+Then just copy `polyfit.c` and `polyfit.h` into your project.
 
-Sound a bit asbtract? No worries, here's some examples of where PolyFit can help:
+### Include It
 
-**Curve Fitting in Data Analysis** 
-- In climate science research, polynomial curve fitting is applied to analyse historical temperature data and predict future climate trends, aiding in understanding global warming patterns.
-
-**Signal Processing and Filtering**
-- Biomedical engineers use polynomial filters to remove noise from electroencephalogram (EEG) signals within neuroscience research, improving the detection of brainwave patterns and facilitating the diagnosis of neurological disorders.
-
-**Financial Modeling and Time Series Analysis**
-- Financial analysts utilise polynomial regression models to analyse market data and predict prices. For example, in investment banking, polynomial models are employed to forecast future stock prices, aiding investors in making informed trading decisions.
-
-**Robotics and Path Planning**
-- Autonomous drones use polynomial trajectories for path planning in search and rescue missions. For instance, in disaster response scenarios, drones navigate through complex environments by following smooth polynomial paths, enabling efficient search operations and rescuing survivors. Think:
-  - feature trajectory estimation;
-  - motion model for localisation;
-  - map building and refinement; and
-  - sensor calibration.
-
-**Transform Functions and Control Systems**
-- Polynomial models are vital in representing system transfer functions, which describe the relationship between inputs and outputs of a dynamic system. By mapping polynomials to transfer functions, engineers can model the behavior of diverse systems across various domains, including aerospace, automotive, and industrial control.
-
-- Engineers can use transfer functions derived from polynomials to perform advanced control systems analysis techniques, such as Root-Locus, freq response analysis, and pole-zero analysis to achieve desired performance objectives, such as stability, responsiveness, and robustness.
-
-**Control System Applications**
-- In industrial automation, polynomial controllers regulate motors by translating input commands into precise motor outputs. 
-- By applying specific inputs and measuring corresponding outputs, such as speed or torque, engineers optimise manufacturing processes. 
-- For example, in controlling fluid pump outputs, polynomial controllers enable adjustments to achieve desired pressure levels or flow rates, enhancing efficiency and product quality.
-
-**[Back to top](#table-of-contents)**
-
-# Project Status
-
-The current system requires the user to specify the desired order of polynomial to be fit to the data.
-Future releases will focus on auto-detecting the most suitable, lowest-order polynomial.
-
-**[Back to top](#table-of-contents)**
-
-## Getting Started
-
-### Requirements
-
-At a minimum you will need:
-
-* [`git-lfs`](https://git-lfs.github.com), which is used to store binary files in this repository
-* [CMake](#cmake-build-system) is the build system
-* Some kind of compiler for your target system.
-    - This repository has been tested with:
-        - gcc-7, gcc-8, gcc-9
-        - arm-none-eabi-gcc
-        - Apple clang
-        - Mainline clang
-
-#### git-lfs
-
-This project stores some files using [`git-lfs`](https://git-lfs.github.com).
-
-To install `git-lfs` on Linux:
-
-```
-sudo apt install git-lfs
+```c
+#include "polyfit.h"
 ```
 
-To install `git-lfs` on OS X:
+### Basic Usage
 
-```
-brew install git-lfs
-```
+**Example 1: Simple linear fit (recommended)**
 
-Additional installation instructions can be found on the [`git-lfs` website](https://git-lfs.github.com).
+```c
+#include "polyfit.h"
+#include <stdio.h>
 
-#### CMake Build System
+int main(void) {
+    // Your data points
+    float x[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    float y[] = {2.1, 3.9, 6.1, 8.0, 9.9};
 
-The official way to install CMake is to use the pre-compiled binaries and installers on the [CMake download page](https://cmake.org/download/). You can also [compile CMake from source](https://cmake.org/install/). CMake can also be installed through popular package managers, although they may be slightly behind the latest release available on the website.
+    // Fit a linear polynomial (degree 1)
+    Polynomial *poly = polyfit(x, y, 5, 1, NULL);
+    if (poly) {
+        float result;
+        polyfit_evaluate(poly, 6.0f, &result);
+        printf("f(6.0) = %f\n", result);  // Predict at x=6
+        polyfit_free(poly);
+    }
 
-You can install CMake with `apt` on Linux/WSL:
-
-```
-sudo apt-get install cmake
-```
-
-> **Note:** Does this not work? You may need to add an [apt repository](https://apt.kitware.com/).
-
-OS X users can install CMake using [Homebrew](homebrew):
-
-```
-brew install cmake
-```
-
-You can also use Python's `pip` to install CMake:
-
-```
-$ pip3 install cmake
+    return 0;
+}
 ```
 
-Make is the default backend for CMake, but our Makefile interface defaults to Ninja. Ninja is similar in purpose to Make, but provides better performance. 
+**Example 2: One-shot evaluation (no memory management)**
 
-To install Ninja on Linux & WSL:
+```c
+// Fit and evaluate in one call - perfect for quick predictions
+float x[] = {0.0, 1.0, 2.0, 3.0};
+float y[] = {1.0, 2.0, 5.0, 10.0};
+float result;
 
-```
-$ sudo apt install ninja-build
-```
-
-To install on OSX:
-
-```
-$ brew install ninja
-```
-
-
-**[Back to top](#table-of-contents)**
-
-### Getting the Source
-
-This project uses [`git-lfs`](https://git-lfs.github.com), so please install it before cloning. If you cloned prior to installing `git-lfs`, simply run `git lfs pull` after installation.
-
-This project is hosted on GitHub. You can clone the project directly using this command:
-
-```
-git clone --recursive git@github.com:finorr/polyfit.git
+if (polyfit_eval_at(x, y, 4, 2, 4.0f, &result) == POLYFIT_SUCCESS) {
+    printf("f(4.0) = %f\n", result);
+}
 ```
 
-If you don't clone recursively, be sure to run the following command in the repository or your build will fail:
+**Example 3: Extract coefficients**
 
-```
-git submodule update --init
-```
-
-**[Back to top](#table-of-contents)**
-
-### Building
-
-If Make is installed, the library can be built by issuing the following command:
-
-```
-make
+```c
+Polynomial *poly = polyfit(x, y, 5, 2, NULL);
+if (poly) {
+    float coeffs[3];  // degree + 1
+    if (polyfit_get_coefficients(poly, coeffs, 3) == POLYFIT_SUCCESS) {
+        printf("y = %.2f + %.2f*x + %.2f*x^2\n",
+               coeffs[0], coeffs[1], coeffs[2]);
+    }
+    polyfit_free(poly);
+}
 ```
 
-This will build all targets for your current architecture.
+**Example 4: Error handling**
 
-You can clean builds using:
-
-```
-make clean
-```
-
-You can eliminate the generated `buildresults` folder using:
-
-```
-make distclean
-```
-
-You can also use  `CMake` directly for compiling.
-
-Create a build output folder:
-
-```
-cmake -B buildresults
+```c
+polyfit_error_t err;
+Polynomial *poly = polyfit(x, y, num_points, degree, &err);
+if (!poly) {
+    fprintf(stderr, "Error: %s\n", polyfit_error_string(err));
+    return -1;
+}
+// Use polynomial...
+polyfit_free(poly);
 ```
 
-And build all targets by running
+### Integration
 
-```
-ninja -C buildresults
-```
+Just copy these two files into your project:
+- `polyfit.c`
+- `polyfit.h`
 
-Cross-compilation is handled using CMake toolchain files. Example files are included in the [`cmake/toolchains/cross`](cmake/toolchains/cross/) folder. You can write your own cross files for your specific processor by defining the toolchain, compilation flags, and linker flags. These settings will be used to compile the project.
+Then compile with your source code:
 
-Cross-compilation must be configured using the CMake command when creating the build output folder. For example:
-
-```
-cmake -B buildresults -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/cross/cortex-m3.cmake
+```bash
+gcc -o myapp main.c polyfit.c -lm
 ```
 
-Following that, you can run `make` (at the project root) or `ninja` to build the project.
-
-Tests will not be cross-compiled. They will only be built for the native platform.
-
-**[Back to top](#table-of-contents)**
-
-### Testing
-
-The tests for this project are written in CMocka and Catch, which are included as external dependencies and does not need to be installed on your system. You can run the tests by issuing the following command:
-
-```
-make test
-```
-
-By default, test results are generated for use by the CI server and are formatted in JUnit XML. The test results XML files can be found in `buildresults/test/`.
-
-**[Back to top](#table-of-contents)**
+---
 
 ## Documentation
 
-Documentation can be built locally by running the following command:
+More detailed info and examples are available on the [Wiki](https://github.com/FinOrr/polyfit/wiki).
 
-```
-make docs
-```
-
-Documentation can be found in `buildresults/docs`, and the root page is `index.html`.
-
-**[Back to top](#table-of-contents)**
-
-## Need help?
-
-For any inquiries or support, please use the [Issues](https://github.com/FinOrr/polyfit/issues) page.
-
-If you need further assistance or have any questions, please file a GitHub issue or [send me an email](mailto:3ikxlgcis@mozmail.com).
+---
 
 ## Contributing
 
-If you are interested in contributing to this project, please read our [contributing guidelines](docs/CONTRIBUTING.md).
+Found a bug? Want to improve performance or add features? PRs welcome, just read the [contributing guide](CONTRIBUTING.md) first.
 
-## Authors
-
-* Polyfit source code - **[Fin Orr](https://github.com/finorr)**
-* CMake Repo Design -  **[Phillip Johnston](https://github.com/phillipjohnston)**
+---
 
 ## License
 
-See the [LICENSE](LICENSE) file for licensing details.
+MIT. See [LICENSE](LICENSE) for full details.
 
-## Acknowledgments
+---
 
-This repository was built using the [CMake repository template](https://github.com/embeddedartistry/cmake-project-skeleton) from the team at Embedded Artistry.
+## Questions?
 
-**[Back to top](#table-of-contents)**
+Open an [issue](https://github.com/FinOrr/polyfit/issues) if you get stuck or want to ask anything.
