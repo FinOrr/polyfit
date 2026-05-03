@@ -1,9 +1,8 @@
 # polyfit
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Top Language](https://img.shields.io/github/languages/top/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit)
+[![CI](https://github.com/FinOrr/polyfit/actions/workflows/ci.yml/badge.svg)](https://github.com/FinOrr/polyfit/actions/workflows/ci.yml)
 [![Issues](https://img.shields.io/github/issues/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/FinOrr/polyfit.svg)](https://github.com/FinOrr/polyfit/pulls)
 
 A lightweight C library for fitting polynomials to data: fast, simple, and no external dependencies.
 
